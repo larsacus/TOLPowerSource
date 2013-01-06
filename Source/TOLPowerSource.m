@@ -154,12 +154,25 @@
     return upsSource;
 }
 
++ (TOLPowerSource *)providingPowerSource{
+    CFTypeRef powerSourcesInfo = IOPSCopyPowerSourcesInfo();
+    NSString *providingPowerSourceType = (__bridge NSString *)IOPSGetProvidingPowerSourceType(powerSourcesInfo);
+    
+    NSArray *allPowerSources = [self allPowerSources];
+    for (TOLPowerSource *powerSource in allPowerSources) {
+        if (powerSource.type == [self typeFromString:providingPowerSourceType]) {
+            //power source is providing power source
+            return powerSource;
+        }
+    }
+    
+    return nil;
+}
+
 + (BOOL)isOnBatteryPower{
     
     CFTypeRef powerSourcesInfo = IOPSCopyPowerSourcesInfo();
     CFStringRef providingPowerSourceType = IOPSGetProvidingPowerSourceType(powerSourcesInfo);
-    
-    //TODO: might have to iterate through sources
     
     return [((__bridge NSString *)providingPowerSourceType) isEqualToString:@kIOPSBatteryPowerValue];
 }

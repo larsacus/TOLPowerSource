@@ -66,5 +66,6 @@ typedef NS_ENUM(NSInteger, TOLPowerSourceBatteryHealthCondition){
 + (TOLPowerSource *)internalBatterySource;
 + (TOLPowerSource *)upsBatterySource;
 + (BOOL)isOnBatteryPower;
++ (TOLPowerSource *)providingPowerSource;
 
 @end
