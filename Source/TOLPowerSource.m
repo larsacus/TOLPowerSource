@@ -99,7 +99,10 @@
     }
     
     CFRelease(powerSourcesInfo);
-    CFRelease(powerSources);
+    
+    if (powerSources != NULL) {
+        CFRelease(powerSources);
+    }
     
     return sourcesArray;
 }
@@ -158,6 +161,10 @@
     CFTypeRef powerSourcesInfo = IOPSCopyPowerSourcesInfo();
     NSString *providingPowerSourceType = (__bridge NSString *)IOPSGetProvidingPowerSourceType(powerSourcesInfo);
     
+    if (powerSourcesInfo != NULL) {
+        CFRelease(powerSourcesInfo);
+    }
+    
     NSArray *allPowerSources = [self allPowerSources];
     for (TOLPowerSource *powerSource in allPowerSources) {
         if (powerSource.type == [self typeFromString:providingPowerSourceType]) {
@@ -173,6 +180,10 @@
     
     CFTypeRef powerSourcesInfo = IOPSCopyPowerSourcesInfo();
     CFStringRef providingPowerSourceType = IOPSGetProvidingPowerSourceType(powerSourcesInfo);
+    
+    if (powerSourcesInfo != NULL) {
+        CFRelease(powerSourcesInfo);
+    }
     
     return [((__bridge NSString *)providingPowerSourceType) isEqualToString:@kIOPSBatteryPowerValue];
 }
