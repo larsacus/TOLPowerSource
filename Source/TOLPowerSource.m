@@ -9,8 +9,8 @@
 #import "TOLPowerSource.h"
 #import <IOKit/ps/IOPowerSources.h>
 #import <IOKit/ps/IOPSKeys.h>
-//#import <IOKit/ps/IOUPSPlugIn.h>
-#import <objc/runtime.h>
+
+NSString * const kTOLPowerSourcePowerTypeUPSPower = @"UPS Power"; //This key is returned by IOPSGetProvidingPowerSourceType sometimes, but is not defined in IOPSKeys.h
 
 @interface TOLPowerSource ()
 
@@ -185,7 +185,10 @@
         CFRelease(powerSourcesInfo);
     }
     
-    return [((__bridge NSString *)providingPowerSourceType) isEqualToString:@kIOPSBatteryPowerValue];
+    NSString *powerSourceType = ((__bridge NSString *)providingPowerSourceType);
+    
+    return ([powerSourceType isEqualToString:@kIOPSBatteryPowerValue] ||
+            [powerSourceType isEqualToString:kTOLPowerSourcePowerTypeUPSPower]);
 }
 
 #pragma mark - Internal Helpers
