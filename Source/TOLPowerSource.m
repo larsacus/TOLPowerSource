@@ -14,8 +14,8 @@
 #import "TOLPowerSource.h"
 #import <IOKit/ps/IOPowerSources.h>
 #import <IOKit/ps/IOPSKeys.h>
-//#import <IOKit/ps/IOUPSPlugIn.h>
-#import <objc/runtime.h>
+
+NSString * const kTOLPowerSourcePowerTypeUPSPower = @"UPS Power"; //This key is returned by IOPSGetProvidingPowerSourceType sometimes, but is not defined in IOPSKeys.h
 
 @interface TOLPowerSource ()
 
@@ -104,7 +104,10 @@
     }
     
     CFRelease(powerSourcesInfo);
-    CFRelease(powerSources);
+    
+    if (powerSources != NULL) {
+        CFRelease(powerSources);
+    }
     
     return sourcesArray;
 }
@@ -159,14 +162,38 @@
     return upsSource;
 }
 
++ (TOLPowerSource *)providingPowerSource{
+    CFTypeRef powerSourcesInfo = IOPSCopyPowerSourcesInfo();
+    NSString *providingPowerSourceType = (__bridge NSString *)IOPSGetProvidingPowerSourceType(powerSourcesInfo);
+    
+    if (powerSourcesInfo != NULL) {
+        CFRelease(powerSourcesInfo);
+    }
+    
+    NSArray *allPowerSources = [self allPowerSources];
+    for (TOLPowerSource *powerSource in allPowerSources) {
+        if (powerSource.type == [self typeFromString:providingPowerSourceType]) {
+            //power source is providing power source
+            return powerSource;
+        }
+    }
+    
+    return nil;
+}
+
 + (BOOL)isOnBatteryPower{
     
     CFTypeRef powerSourcesInfo = IOPSCopyPowerSourcesInfo();
     CFStringRef providingPowerSourceType = IOPSGetProvidingPowerSourceType(powerSourcesInfo);
     
-    //TODO: might have to iterate through sources
+    if (powerSourcesInfo != NULL) {
+        CFRelease(powerSourcesInfo);
+    }
     
-    return [((__bridge NSString *)providingPowerSourceType) isEqualToString:@kIOPSBatteryPowerValue];
+    NSString *powerSourceType = ((__bridge NSString *)providingPowerSourceType);
+    
+    return ([powerSourceType isEqualToString:@kIOPSBatteryPowerValue] ||
+            [powerSourceType isEqualToString:kTOLPowerSourcePowerTypeUPSPower]);
 }
 
 #pragma mark - Internal Helpers
